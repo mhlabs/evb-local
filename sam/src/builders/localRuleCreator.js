@@ -1,6 +1,5 @@
-const eventBridgeClient = require("./eventBridgeClient");
-const cloudFormationClient = require("./cloudFormationClient");
-
+const eventBridgeClient = require('./eventBridgeClient');
+const cloudFormationClient = require('./cloudFormationClient');
 
 async function create(event) {
   const body = JSON.parse(event.body);
@@ -10,15 +9,32 @@ async function create(event) {
   const ruleName = eventBridgeClient.getRuleName(localRule.EventBusName);
   const eventConsumerName = await cloudFormationClient.getEventConsumerName();
 
-  await eventBridgeClient.putRule(localRule.EventBusName, localRule, ruleName);
+  try {
+    await eventBridgeClient.putRule(
+      localRule.EventBusName,
+      localRule,
+      ruleName
+    );
 
-  const targets = [eventBridgeClient.createTarget(eventConsumerName, localRule, localRule.Target, token)];
-  await eventBridgeClient.putTargets(localRule.EventBusName, ruleName, targets);
+    const targets = [
+      eventBridgeClient.createTarget(
+        eventConsumerName,
+        localRule,
+        localRule.Target,
+        token
+      )
+    ];
+    await eventBridgeClient.putTargets(
+      localRule.EventBusName,
+      ruleName,
+      targets
+    );
+  } catch (err) {
+    return { error: err };
+  }
 
   return [ruleName];
 }
-
-
 
 module.exports = {
   create

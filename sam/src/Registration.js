@@ -8,10 +8,8 @@ const apigateway = new AWS.ApiGatewayManagementApi({
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-
 async function handler(event, context) {
   console.log(event);
-  console.log(JSON.parse(event.body).rules);
   const body = JSON.parse(event.body);
   const token = body.token;
   const localRule = body.localRule;
@@ -21,7 +19,15 @@ async function handler(event, context) {
   } else {
     ruleNames = await stackRuleCreator.create(event);
   }
-
+  if (ruleNames.error) {
+    await apigateway
+      .postToConnection({
+        ConnectionId: event.requestContext.connectionId,
+        Data: ruleNames.error.toString()
+      })
+      .promise();
+    return { statusCode: 500 };
+  }
   await dynamoDb
     .put({
       Item: {
