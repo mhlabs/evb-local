@@ -134,5 +134,5 @@ Options:
 ```
 
 Where:
-* `RuleTarget` is the name identifier of the EventBridge rule's target. If this exists in the same stack it will display the CloudFromation LogicalID
+* `RuleTargetArn` is the ARN of the event's target. 
 * `EventPayload` is the payload of the event
