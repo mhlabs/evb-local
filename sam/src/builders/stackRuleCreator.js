@@ -34,7 +34,7 @@ async function create(event) {
         const targetLogicalId =
           targetLogicalIds && targetLogicalIds.length
             ? targetLogicalIds[0].LogicalResourceId
-            : targetPhysicalId || 'UnknownTarget';
+            : targetPhysicalId || 'Unknown target';
         
         targets.push(eventBridgeClient.createTarget(eventConsumerName, target, targetLogicalId, token));
       }

@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const localRuleCreator = require('./builders/localRuleCreator');
 const stackRuleCreator = require('./builders/stackRuleCreator');
+const ruleArnCreator = require('./builders/ruleArnCreator');
 
 const apigateway = new AWS.ApiGatewayManagementApi({
   endpoint: `https://${process.env.ApiId}.execute-api.${process.env.AWS_REGION}.amazonaws.com/Prod/`
@@ -13,9 +14,13 @@ async function handler(event, context) {
   const body = JSON.parse(event.body);
   const token = body.token;
   const localRule = body.localRule;
+  const ruleArn = body.ruleArn;
+  console.log("Rulearn", ruleArn)
   let ruleNames;
   if (localRule) {
     ruleNames = await localRuleCreator.create(event);
+  } else if (ruleArn) {
+    ruleNames = await ruleArnCreator.create(event);
   } else {
     ruleNames = await stackRuleCreator.create(event);
   }

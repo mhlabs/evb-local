@@ -8,6 +8,7 @@ const os = require('os');
 
 const stackListener = require('./listeners/stackListener');
 const localPatternListener = require('./listeners/localPatternListener');
+const arnListener = require('./listeners/arnListener');
 
 const EVB_CACHE_DIR = `${os.homedir()}/.evb-local`;
 
@@ -31,6 +32,27 @@ program
       stackName,
       cmd.compact.toLowerCase() === 'true',
       cmd.samLocal.toLowerCase() === 'true'
+    );
+  });
+
+program
+  .command('rule-arn [arn]')
+  .alias('a')
+  .option('-c, --compact [compact]', 'Output compact JSON on one line', 'false')
+  .description("Initiates local consumption of a rule ARN")
+  .action(async (ruleArn, cmd) => {
+    if (!process.env.AWS_REGION) {
+      console.log(
+        'Please set environment variable AWS_REGION to your desired region. I.e us-east-1'
+      );
+      return;
+    }
+    await authenticate();
+    await arnListener.init(
+      ruleArn,
+      cmd.target,
+      cmd.compact.toLowerCase() === 'true',
+      false
     );
   });
 

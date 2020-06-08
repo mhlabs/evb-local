@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const AWS = require('aws-sdk');
 
-function connect(url, token, stackName, compact, sam, rule) {
+function connect(url, token, stackName, compact, sam, rule, ruleArn, target) {
   const lambda = new AWS.Lambda({
     endpoint: 'http://127.0.0.1:3001/',
     sslEnabled: false
@@ -13,7 +13,9 @@ function connect(url, token, stackName, compact, sam, rule) {
       action: 'register',
       token: token,
       stack: stackName,
-      localRule: rule
+      localRule: rule,
+      ruleArn: ruleArn,
+      target: target
     });
     ws.send(payload, (err) => {
       if (err) {
@@ -56,6 +58,16 @@ function connect(url, token, stackName, compact, sam, rule) {
   return ws;
 }
 
+async function apiId() {
+  const cloudFormation = new AWS.CloudFormation();
+  const evbLocalStack = await cloudFormation
+    .listStackResources({ StackName: 'evb-local' })
+    .promise();
+  const apiGatewayId = evbLocalStack.StackResourceSummaries.filter(p => p.LogicalResourceId === 'WebSocket')[0].PhysicalResourceId;
+  return apiGatewayId;
+}
+
 module.exports = {
-  connect
+  connect,
+  apiId
 };

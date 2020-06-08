@@ -87,10 +87,45 @@ Options:
   -h, --help                          display help for command
 ```
 
+## Usage of `rule-arn` command
+This command can be used to consume the events matching the targets of a specific rule arn. If there are more than one target of the rule, then a payload of each target will be presented together with the target ARN.
+
+![Demo](https://raw.githubusercontent.com/mhlabs/evb-local/master/demo3.gif)
+In the above example `arn:aws:events:eu-west-1:123456789012:rule/codepipeline-change-state` has the following rule:
+```
+{
+  "source": [
+    "aws.codepipeline"
+  ],
+  "detail-type": [
+    "CodePipeline Stage Execution State Change"
+  ],
+  "detail": {
+    "state": [
+      "FAILED",
+      "STARTED",
+      "SUCCEEDED"
+    ]
+  }
+}
+```
+When the connection is established, each state transition gets outputted locally.
+
+
+```
+Usage: evb-local rule-arn|a [options] [arn]
+
+Initiates local consumption of a rule ARN
+
+Options:
+  -c, --compact [compact]  Output compact JSON on one line (default: "false")
+  -h, --help               display help for command
+```
+
 ### Example output
 ```
 {
-  "Target": <RuleTarget>,
+  "Target": <RuleTargetArn>,
   "Body": {
     <EventPayload>
   }

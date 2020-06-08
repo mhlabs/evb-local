@@ -1,4 +1,3 @@
-const AWS = require('aws-sdk');
 const fs = require('fs');
 const utils = require('../utils');
 const { v4: uuidv4 } = require('uuid');
@@ -78,16 +77,9 @@ async function initLocalPatternListener(stackName, templateFile, compact, sam) {
     }
   }
 
-  const cloudFormation = new AWS.CloudFormation();
-  const evbLocalStack = await cloudFormation
-    .listStackResources({ StackName: 'evb-local' })
-    .promise();
-  const apiGatewayId = evbLocalStack.StackResourceSummaries.filter(
-    (p) => p.LogicalResourceId === 'WebSocket'
-  )[0].PhysicalResourceId;
   const token = uuidv4();
   websocket.connect(
-    `wss://${apiGatewayId}.execute-api.${process.env.AWS_REGION}.amazonaws.com/Prod`,
+    `wss://${await websocket.apiId()}.execute-api.${process.env.AWS_REGION}.amazonaws.com/Prod`,
     token,
     stackName,
     compact,

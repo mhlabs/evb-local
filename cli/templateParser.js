@@ -41,7 +41,6 @@ function handleSAMFunction(resource, rules, resourceKey) {
         } else {
           targetName = target.Arn.split(':').slice(-1)[0];
         }
-        console.log(targetName);
         rules.push({
           ...rule,
           Name: `${resourceKey} -> ${targetName}`,
