@@ -9,7 +9,7 @@
   "author": "mhlabs",
   "license": "ISC",
   "dependencies": {
-    "@mhlabs/aws-sso-client-auth": "^1.0.7",
+    "@mhlabs/aws-sso-client-auth": "^1.0.9",
     "aws-sdk": "^2.670.0",
     "commander": "^5.1.0",
     "inquirer": "^7.1.0",
