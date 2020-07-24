@@ -38,17 +38,15 @@ Install CLI
 
 ## Usage
 ```
-Usage: evb-local [options] [command]
+Usage: index listen|l [options] [StackName]
+
+Initiates local consumption of a stack's EventBridge rules
 
 Options:
-  -v, --vers                        output the current version
-  -h, --help                        display help for command
-
-Commands:
-  listen|l [options] [StackName]    Initiates local consumption of a stack's EventBridge rules
-  test-rule|t [options] [RuleName]  Initiates local consumption of an undeployed EventBridge rule
-  configure-sso [options]           Configure authentication with AWS Single Sign-On
-  help [command]                    display help for command
+  -c, --compact [compact]  Output compact JSON on one line (default: "false")
+  -s, --sam-local [sam]    Send requests to sam-local (default: "false")
+  -p, --profile [profile]  AWS profile to use
+  -h, --help               display help for command
 ```
 
 ## Usage of `listen` command
@@ -64,8 +62,6 @@ Initiates local consumption of a stacks EventBridge rules
 Options:
   -c, --compact [compact]  Output compact JSON on one line (default: "false")
   -s, --sam-local [sam]    Send requests to sam-local (default: "false")
-  --sso                    Authenticate with AWS SSO. Set environment variable EVB_CLI_SSO=1 for
-                           default behaviour
   -h, --help               display help for command
 ```
 

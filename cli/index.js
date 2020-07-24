@@ -3,14 +3,11 @@
 const AWS = require('aws-sdk');
 const program = require('commander');
 const ssoAuth = require('@mhlabs/aws-sso-client-auth');
-const storage = require('node-persist');
-const os = require('os');
-
+const inquirer = require('inquirer');
 const stackListener = require('./listeners/stackListener');
 const localPatternListener = require('./listeners/localPatternListener');
 const arnListener = require('./listeners/arnListener');
-
-const EVB_CACHE_DIR = `${os.homedir()}/.evb-local`;
+const prompt = inquirer.createPromptModule();
 
 program.version('1.0.3', '-v, --vers', 'output the current version');
 program
@@ -18,6 +15,7 @@ program
   .alias('l')
   .option('-c, --compact [compact]', 'Output compact JSON on one line', 'false')
   .option('-s, --sam-local [sam]', 'Send requests to sam-local', 'false')
+  .option("-p, --profile [profile]", "AWS profile to use")
   .description("Initiates local consumption of a stack's EventBridge rules")
   .action(async (stackName, cmd) => {
     if (!process.env.AWS_REGION) {
@@ -27,7 +25,7 @@ program
       return;
     }
 
-    await authenticate();
+    await authenticate(cmd.profile);
     await stackListener.init(
       stackName,
       cmd.compact.toLowerCase() === 'true',
@@ -39,6 +37,7 @@ program
   .command('rule-arn [arn]')
   .alias('a')
   .option('-c, --compact [compact]', 'Output compact JSON on one line', 'false')
+  .option("-p, --profile [profile]", "AWS profile to use")
   .description("Initiates local consumption of a rule ARN")
   .action(async (ruleArn, cmd) => {
     if (!process.env.AWS_REGION) {
@@ -47,7 +46,7 @@ program
       );
       return;
     }
-    await authenticate();
+    await authenticate(cmd.profile);
     await arnListener.init(
       ruleArn,
       cmd.target,
@@ -66,6 +65,7 @@ program
   )
   .option('-c, --compact [compact]', 'Output compact JSON on one line', 'false')
   .option('-s, --sam-local [sam]', 'Send requests to sam-local', 'false')
+  .option("-p, --profile [profile]", "AWS profile to use")
   .description('Initiates local consumption of an undeployed EventBridge rule')
   .action(async (ruleName, cmd) => {
     if (!process.env.AWS_REGION) {
@@ -75,7 +75,7 @@ program
       return;
     }
 
-    await authenticate();
+    await authenticate(cmd.profile);
     await localPatternListener.init(
       ruleName,
       cmd.templateFile,
@@ -84,26 +84,6 @@ program
     );
   });
 
-program
-  .command('configure-sso')
-  .option('-a, --account-id <accountId>', 'Account ID')
-  .option('-u, --start-url <startUrl>', 'AWS SSO start URL')
-  .option('--region <region>', 'AWS region')
-  .option('--role <role>', 'Role to get credentials for')
-  .description('Configure authentication with AWS Single Sign-On')
-  .action(async cmd => {
-    await storage.init({
-      dir: EVB_CACHE_DIR,
-      expiredInterval: 0
-    });
-
-    await storage.setItem('evb-cli-sso', {
-      accountId: cmd.accountId,
-      startUrl: cmd.startUrl,
-      region: cmd.region,
-      role: cmd.role
-    });
-  });
 program.on('command:*', () => {
   const command = program.args[0];
 
@@ -116,20 +96,18 @@ program.parse(process.argv);
 if (process.argv.length < 3) {
   program.help();
 }
-async function authenticate() {
-  await storage.init({
-    dir: EVB_CACHE_DIR
-  });
-  const ssoConfig = await storage.getItem('evb-cli-sso');
-  if (ssoConfig) {
-    await ssoAuth.configure({
-      clientName: 'evb-cli',
-      startUrl: ssoConfig.startUrl,
-      accountId: ssoConfig.accountId,
-      region: ssoConfig.region
+async function authenticate(profile) {
+  if (profile === true) {
+    const answer = await prompt({
+      name: "id",
+      type: "list",
+      message: "Select profile",
+      choices: await ssoAuth.listProfiles
     });
-    AWS.config.update({
-      credentials: await ssoAuth.authenticate(ssoConfig.role)
-    });
+    profile = answer.id;
   }
+  const config = await ssoAuth.requestAuth("evb-cli", profile);
+  AWS.config.update({
+    config
+  });
 }
