@@ -2,14 +2,14 @@
 
 const AWS = require('aws-sdk');
 const program = require('commander');
-const ssoAuth = require('@mhlabs/aws-sso-client-auth');
 const inquirer = require('inquirer');
 const stackListener = require('./listeners/stackListener');
 const localPatternListener = require('./listeners/localPatternListener');
 const arnListener = require('./listeners/arnListener');
 const prompt = inquirer.createPromptModule();
+require('@mhlabs/aws-sdk-sso');
 
-program.version('1.0.3', '-v, --vers', 'output the current version');
+program.version('1.0.8', '-v, --vers', 'output the current version');
 program
   .command('listen [StackName]')
   .alias('l')
@@ -97,17 +97,8 @@ if (process.argv.length < 3) {
   program.help();
 }
 async function authenticate(profile) {
-  if (profile === true) {
-    const answer = await prompt({
-      name: "id",
-      type: "list",
-      message: "Select profile",
-      choices: await ssoAuth.listProfiles
-    });
-    profile = answer.id;
-  }
-  const config = await ssoAuth.requestAuth("evb-cli", profile);
-  AWS.config.update({
-    config
-  });
+  process.env.AWS_PROFILE = profile || process.env.AWS_PROFILE || "default";
+  AWS.config.credentialProvider.providers.unshift(
+    new AWS.SingleSignOnCredentials()
+  );
 }
