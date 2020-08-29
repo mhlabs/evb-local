@@ -1,5 +1,10 @@
 # evb-local
 
+*****************
+# IMPORTANT:
+This project has been deprecated and will not receive any more updates. The functionality has been ported to [evb-cli](https://github.com/mhlabs/evb-cli)
+*****************
+
 Tool that lets you subscribe locally to events matching EventBridge rules in a given deployed stack. This is to help with debugging of complex flow of events raised in your applicaton.
 
 ## Backend setup (once per AWS account)

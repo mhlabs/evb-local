@@ -8,8 +8,8 @@ const localPatternListener = require('./listeners/localPatternListener');
 const arnListener = require('./listeners/arnListener');
 const prompt = inquirer.createPromptModule();
 require('@mhlabs/aws-sdk-sso');
-
-program.version('1.0.8', '-v, --vers', 'output the current version');
+console.log("This tool has been deprecated and will not receive any further updates. Its functionality has been ported to evb-cli. Get it @ npm i -g @mhlabs/evb-cli")
+program.version('1.0.9', '-v, --vers', 'output the current version');
 program
   .command('listen [StackName]')
   .alias('l')

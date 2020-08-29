@@ -1,6 +1,6 @@
 {
   "name": "@mhlabs/evb-local",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A CLI tool for local ingestion of a CloudFormation stack's EventBridge rules",
   "main": "index.js",
   "scripts": {
